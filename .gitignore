@@ -1,0 +1,5 @@
+node_modules
+.idea
+.editorconfig
+.eslintrc.js
+.prettierrc.js
