@@ -1,62 +1,30 @@
 'use strict';
 
-(function () {
+(function() {
   var noticeForm = document.querySelector('.notice__form');
   var timein = noticeForm.querySelector('#timein');
   var timeout = noticeForm.querySelector('#timeout');
   var roomNumber = noticeForm.querySelector('#room_number');
-  var capacity =  noticeForm.querySelector('#capacity');
+  var capacity = noticeForm.querySelector('#capacity');
   var typeOfAccomodation = noticeForm.querySelector('#type');
   var price = noticeForm.querySelector('#price');
 
-  timein.addEventListener('change', function () {
-    if (timein.value !== timeout.value) {
-      timeout.value = timein.value;
-    }
-  });
+  var syncValues = function(element, value) {
+    element.value = value;
+  };
+  var syncValuesWithMin = function(element, value) {
+    element.min = value;
+    element.value = value;
+  };
 
-  timeout.addEventListener('change', function () {
-    if (timeout.value !== timein.value) {
-      timein.value = timeout.value;
-    }
-  });
+  window.synchronizeFields(timein, timeout, ['12:00', '13:00', '14:00'], ['12:00', '13:00', '14:00'], syncValues);
+  window.synchronizeFields(timeout, timein, ['12:00', '13:00', '14:00'], ['12:00', '13:00', '14:00'], syncValues);
+  window.synchronizeFields(roomNumber, capacity, ['1', '2', '3', '100'], ['1', '2', '3', '0'], syncValues);
+  window.synchronizeFields(capacity, roomNumber, ['1', '2', '3', '0'], ['1', '2', '3', '100'], syncValues);
+  window.synchronizeFields(typeOfAccomodation, price, ['bungalo', 'flat', 'house', 'palace'], ['0', '1000', '5000', '10000'], syncValuesWithMin);
 
-  roomNumber.addEventListener('change', function () {
-    switch (roomNumber.value) {
-      case '1':
-        capacity.value = '1';
-        break;
-      case '2':
-        capacity.value = '2';
-        break;
-      case '3':
-        capacity.value = '3';
-        break;
-      case '100':
-        capacity.value = '0';
-        break;
-    }
-  });
-
-  capacity.addEventListener('change', function () {
-    switch (capacity.value) {
-      case '1':
-        roomNumber.value = '1';
-        break;
-      case '2':
-        roomNumber.value = '2';
-        break;
-      case '3':
-        roomNumber.value = '3';
-        break;
-      case '0':
-        roomNumber.value = '100';
-        break;
-    }
-  });
-
-  price.addEventListener('change', function () {
-    if(Number(price.value) < 1000){
+  price.addEventListener('change', function() {
+    if (Number(price.value) < 1000) {
       typeOfAccomodation.value = 'bungalo';
     } else if (Number(price.value) >= 1000 && Number(price.value) < 5000) {
       typeOfAccomodation.value = 'flat';
@@ -67,21 +35,15 @@
     }
   });
 
-  typeOfAccomodation.addEventListener('change', function () {
-    switch (typeOfAccomodation.value) {
-      case 'bungalo':
-        price.value = '0';
-        break;
-      case 'flat':
-        price.value = '1000';
-        break;
-      case 'house':
-        price.value = '5000';
-        break;
-      case 'palace':
-        price.value = '10000';
-        break;
-    }
+  noticeForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.backend.save(
+      new FormData(noticeForm),
+      function (response) {
+        console.log(response);
+      },
+      window.backend.onError
+    );
   });
 
 })();
